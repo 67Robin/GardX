@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>GardX</title>
+</head>
+<body>
+  <div class="card">
+    <div class="title">GardX</div>
+    
+    <div class="toggle-row">
+      <span>Protection</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div id="status" class="status unknown">
+      No login page detected
+    </div>
+
+    <div class="score-label">Risk Score</div>
+    <div class="progress">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+    <div class="section-title">Signals</div>
+    <div id="signals" class="tags"></div>
+
+    <div id="openphish" class="openphish" style="display:none;">
+       Confirmed by OpenPhish
+    </div>
+
+    <div class="footer">
+      Powered by GardX
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
