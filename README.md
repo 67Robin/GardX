@@ -41,4 +41,4 @@ The extension relies on multiple signals, including:
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/fake-login-detector-extension.git
+git clone https://github.com/67Robin/GardX.git
