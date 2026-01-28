@@ -1,8 +1,6 @@
-console.log("[content.js] injected on:", location.href);
-
-chrome.storage.local.get("enabled", data => {
+const ext = typeof browser !== "undefined" ? browser : chrome;
+ext.storage.local.get("enabled").then(data => {
   if (data.enabled === false) {
-    console.log("[content.js] Protection OFF – skipping detection");
     return;
   }
 
@@ -20,12 +18,11 @@ chrome.storage.local.get("enabled", data => {
       console.log("[content.js] password field detected");
 
       try {
-        const port = chrome.runtime.connect({ name: "scan-port" });
+        const port = ext.runtime.connect({ name: "scan-port" });
         port.postMessage({
           type: "SCAN_URL",
           url: location.href
         });
-        console.log("[content.js] SCAN_URL sent");
       } catch (e) {
         console.error("[content.js] connect failed:", e);
       }

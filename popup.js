@@ -1,3 +1,4 @@
+const ext = typeof browser !== "undefined" ? browser : chrome;
 const toggle = document.getElementById("toggle");
 const status = document.getElementById("status");
 const progressBar = document.getElementById("progressBar");
@@ -5,23 +6,23 @@ const signalsDiv = document.getElementById("signals");
 const openphishDiv = document.getElementById("openphish");
 
 // Load toggle state (default ON)
-chrome.storage.local.get("enabled", data => {
+ext.storage.local.get("enabled").then(data => {
   toggle.checked = data.enabled !== false;
   render();
 });
 
 // Save toggle state
 toggle.addEventListener("change", () => {
-  chrome.storage.local.set({ enabled: toggle.checked });
+  ext.storage.local.set({ enabled: toggle.checked });
   render();
 });
 
-chrome.runtime.onMessage.addListener((msg) => {
+ext.runtime.onMessage.addListener((msg) => {
   if (msg.type === "SCAN_UPDATED") {
     render(); // 🔥 re-render popup instantly
   }
 });
-chrome.storage.onChanged.addListener((changes) => {
+ext.storage.onChanged.addListener((changes) => {
   if (changes) {
     render();
   }
@@ -38,12 +39,12 @@ function render() {
     return;
   }
 
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+  ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
     if (!tabs.length) return;
 
     const key = `scanResult_${tabs[0].id}`;
 
-    chrome.storage.local.get(key, data => {
+    ext.storage.local.get(key).then(data => {
       if (!data || !data[key]) {
         status.className = "status unknown";
         status.innerText = "No login page detected";
@@ -82,7 +83,7 @@ function render() {
     });
   });
 }
-chrome.tabs.onActivated.addListener(() => {
+ext.tabs.onActivated.addListener(() => {
   render();
 });
 

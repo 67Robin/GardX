@@ -1,23 +1,24 @@
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get("enabled", data => {
+const ext = typeof browser !== "undefined" ? browser : chrome;
+ext.runtime.onInstalled.addListener(() => {
+  ext.storage.local.get("enabled").then(data => {
     if (data.enabled === undefined) {
-      chrome.storage.local.set({ enabled: true });
+      ext.storage.local.set({ enabled: true });
       console.log("[GuardX] Default protection set to ON");
     }
   });
 });
-chrome.tabs.onRemoved.addListener(tabId => {
-  chrome.storage.local.remove(`scanResult_${tabId}`);
+ext.tabs.onRemoved.addListener(tabId => {
+  ext.storage.local.remove(`scanResult_${tabId}`);
 });
 
-chrome.runtime.onConnect.addListener(port => {
+ext.runtime.onConnect.addListener(port => {
   if (port.name !== "scan-port") return;
 
   port.onMessage.addListener(message => {
     console.log("Message received:", message);
 
     if (message.type !== "SCAN_URL") return;
-    chrome.storage.local.get("enabled", state => {
+    ext.storage.local.get("enabled").then(state => {
       if (state.enabled === false) {
         console.log("Protection OFF – scan skipped");
         return;
@@ -40,29 +41,29 @@ chrome.runtime.onConnect.addListener(port => {
       .then(data => {
         console.log("Scan result:", data);
 
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
           if (!tabs.length) return;
 
           const tab = tabs[0];
 
-          chrome.storage.local.set({
-            [`scanResult_${tab.id}`]: data
-          }, () => {
-            chrome.runtime.sendMessage({
-              type: "SCAN_UPDATED",
-              tabId: tab.id
+          ext.storage.local
+            .set({ [`scanResult_${tab.id}`]: data })
+            .then(() => {
+              ext.runtime.sendMessage({
+                type: "SCAN_UPDATED",
+                tabId: tab.id
               });
-          });
+            });
         });
         // Get active tab (sender tab may not exist in MV3)
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        ext.tabs.query({ active: true, currentWindow: true }).then(tabs => {
           if (!tabs || !tabs.length) return;
 
           const tab = tabs[0];
           if (!tab.id || !tab.url || !tab.url.startsWith("http")) return;
 
           // Remove old banner if exists
-          chrome.scripting.executeScript({
+          ext.scripting.executeScript({
             target: { tabId: tab.id },
             func: () => {
               const old = document.getElementById("__login_banner__");
@@ -74,7 +75,7 @@ chrome.runtime.onConnect.addListener(port => {
           const isPhishing = data.verdict === "PHISHING";
 
           // Inject banner
-          chrome.scripting.executeScript({
+          ext.scripting.executeScript({
             target: { tabId: tab.id },
             func: showBanner,
             args: [
